@@ -1,6 +1,8 @@
 // routes/movieRoutes.js
 const express = require("express");
 const Movie = require("../models/Movie");
+const { getTopRatedMovies } = require("../controllers/movieController");
+
 
 const router = express.Router();
 
@@ -15,6 +17,21 @@ router.get("/", async (req, res) => {
   }
 });
 
+
+// GET /api/movies/popular
+router.get("/popular", async (req, res) => {
+  try {
+    const movies = await Movie.find()
+      .sort({ popularity: -1 }) // sort by popularity descending
+      .limit(10); // get top 10
+    res.json(movies);
+  } catch (err) {
+    console.error("❌ Error fetching popular movies:", err.message);
+    res.status(500).json({ message: "Error fetching popular movies", error: err.message });
+  }
+});
+  
+
 // GET /api/movies/:id
 router.get("/:id", async (req, res) => {
   try {
@@ -26,5 +43,8 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ message: "Error fetching movie", error: err.message });
   }
 });
+
+ 
+
 
 module.exports = router;

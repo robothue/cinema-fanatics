@@ -1,28 +1,29 @@
-// models/Movie.js
 const mongoose = require("mongoose");
 
-const movieSchema = new mongoose.Schema({
+const MovieSchema = new mongoose.Schema({
   title: String,
-  year: Number,
-  genres: [String],
-  director: String,
-  plot: String,
-  poster: String,
-  backdrop: String,
-  imdb: {
-    id: String,
-    rating: Number,
-    votes: Number
-  },
-  runtime: Number,
+  vote_average: Number,
+  vote_count: Number,
+  status: String,
+  release_date: String,
   revenue: Number,
+  runtime: Number,
+  adult: Boolean,
+  backdrop_path: String,
+  budget: Number,
+  homepage: String,
+  imdb_id: String,
+  original_language: String,
+  original_title: String,
+  overview: String,
+  popularity: Number,
+  poster_path: String,
   tagline: String,
-  language: String,
+  genres: [String],
+  production_companies: String,
   production_countries: [String],
   spoken_languages: [String],
   keywords: [String]
 });
 
-// ✅ Proper CommonJS export
-const Movie = mongoose.model("Movie", movieSchema);
-module.exports = Movie;
+module.exports = mongoose.model("Movie", MovieSchema);

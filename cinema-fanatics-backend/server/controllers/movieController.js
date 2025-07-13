@@ -28,3 +28,23 @@ exports.getMovieById = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch movie detail", error: err });
   }
 };
+
+exports.getTopRatedMovies = async (req, res) => {
+  try {
+    const movies = await Movie.find()
+      .sort({ vote_average: -1 })
+      .limit(10);
+
+    if (!movies || movies.length === 0) {
+      return res.status(404).json({ message: "No top-rated movies found." });
+    }
+
+    res.status(200).json(movies);
+  } catch (error) {
+    console.error("Error fetching top-rated movies:", error);
+    res.status(500).json({
+      message: "Failed to fetch top-rated movies.",
+      error: error.message || "Unknown error"
+    });
+  }
+};
