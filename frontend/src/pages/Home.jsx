@@ -1,13 +1,13 @@
-import HeroSection from "../components/HeroSection";
-import Navbar from "../components/Navbar";
-import FeaturedMovies from "../components/FeaturedMovies";
-import TrendingNow from "../components/TrendingNow";
-import FansFavourite from "../components/FansFavourite";
-import ActionMovies from "../components/ActionMovies";
-import GenreFilters from "../components/GenreFilters";
-import Newsletter from "../components/Newsletter";
-import TVShows from "../components/TVShows";
-import Footer from "../components/Footer";
+import HeroSection from "../components/homepage/HeroSection";
+import Navbar from "../components/homepage/Navbar";
+import FeaturedMovies from "../components/homepage/FeaturedMovies";
+import TrendingNow from "../components/homepage/TrendingNow";
+import FansFavourite from "../components/homepage/FansFavourite";
+import ActionMovies from "../components/homepage/ActionMovies";
+import GenreFilters from "../components/homepage/GenreFilters";
+import Newsletter from "../components/homepage/Newsletter";
+import TVShows from "../components/homepage/TVShows";
+import Footer from "../components/homepage/Footer";
 
 
 export default function Home() {
@@ -15,12 +15,12 @@ export default function Home() {
     <div className="w-screen min-h-screen overflow-x-hidden bg-white text-black">
       <Navbar />
       <HeroSection />
-      <FeaturedMovies />
       <TrendingNow />
+      <FeaturedMovies />
       <FansFavourite />
       <ActionMovies />
       <GenreFilters />
-      {/* <TVShows /> */}
+      <TVShows />
       <Newsletter />
       <Footer />
       

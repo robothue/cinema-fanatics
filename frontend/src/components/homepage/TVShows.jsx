@@ -5,7 +5,7 @@ export default function TVShows() {
   const [tvShows, setTvShows] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/movies") // Adjust to your API
+    axios.get("http://localhost:5000/api/tmdb/tv") // Adjust to your API
       .then(res => {
         const all = res.data;
 

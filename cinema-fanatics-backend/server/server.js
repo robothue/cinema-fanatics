@@ -9,6 +9,8 @@ const morgan = require("morgan");
 const movieRoutes = require("./routes/movieRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const authRoutes = require("./routes/authRoutes");
+const tmdbRoutes = require("./routes/tmdb");
+
 
 
 
@@ -23,6 +25,8 @@ app.use(morgan("dev"));
 app.use("/api/movies", movieRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/tmdb", tmdbRoutes);
+
 
 // Test route
 app.get("/", (req, res) => {

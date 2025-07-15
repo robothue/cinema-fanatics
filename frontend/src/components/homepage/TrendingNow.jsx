@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function FeaturedMovies() {
+export default function TrendingNow() {
   const [movies, setMovies] = useState([]);
   const [page, setPage] = useState(0);
   const MOVIES_PER_PAGE = 6;
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/movies")
-      .then((res) => setMovies(res.data))
-      .catch((err) => console.error("FeaturedMovies error:", err));
+      .get("http://localhost:5000/api/tmdb/trending")
+      .then((res) => {
+        const sorted = res.data.sort((a, b) => b.popularity - a.popularity);
+        setMovies(sorted);
+      })
+      .catch((err) => console.error("TrendingNow error:", err));
   }, []);
 
   const totalPages = Math.ceil(movies.length / MOVIES_PER_PAGE);
@@ -18,20 +21,15 @@ export default function FeaturedMovies() {
   const currentMovies = movies.slice(start, start + MOVIES_PER_PAGE);
 
   const handleNext = () => {
-    if (page < totalPages - 1) {
-      setPage(page + 1);
-    } else {
-      setPage(0); // Loop back to start
-    }
+    setPage((prev) => (prev + 1) % totalPages);
   };
 
   return (
     <section className="bg-white text-black py-14 px-6 md:px-16">
       <h2 className="text-2xl md:text-3xl font-bold mb-6 tracking-tight">
-        Featured Movies
+        Trending Now
       </h2>
 
-      {/* Row of 6 Movies + See More */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-4 md:gap-6">
         {currentMovies.map((movie) => (
           <div
