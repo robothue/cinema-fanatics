@@ -12,8 +12,7 @@ const authRoutes = require("./routes/authRoutes");
 const tmdbRoutes = require("./routes/tmdb");
 
 
-
-
+//This one is for env file
 dotenv.config();
 
 const app = express();
@@ -26,6 +25,7 @@ app.use("/api/movies", movieRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/tmdb", tmdbRoutes);
+
 
 
 // Test route

@@ -7,6 +7,7 @@ const router = express.Router();
 const TMDB_API = "https://api.themoviedb.org/3";
 const API_KEY = process.env.TMDB_API_KEY;
 
+//All of these routes are for TMDB API
 router.get("/featured", async (req, res) => {
   try {
             const allResults = [];
@@ -43,5 +44,40 @@ router.get("/tv", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch TV shows." });
   }
 });
+
+//Moviedetails.jsx
+router.get("/movie/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { data } = await axios.get(`${TMDB_API}/movie/${id}`, {
+      params: {
+        api_key: API_KEY,
+        append_to_response: "videos,credits,similar",
+      },
+    });
+
+    res.json(data);
+  } catch (err) {
+    console.error("❌ Error fetching TMDb movie by ID:", err.message);
+    res.status(500).json({ error: "Failed to fetch movie details." });
+  }
+});
+
+// Add this to your TMDB routes (routes/tmdb.js)
+//This one is for service providers
+router.get("/movie/:id/providers", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data } = await axios.get(`${TMDB_API}/movie/${id}/watch/providers`, {
+      params: { api_key: API_KEY },
+    });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch watch providers." });
+  }
+});
+
+
 
 module.exports = router;

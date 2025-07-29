@@ -12,10 +12,8 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
   },
-  password: {
-    type: String,
-    required: true,
-  },
+  password: String, // Not required if using Google only,
+  googleId: String, // Optional for Google OAuth users
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);
