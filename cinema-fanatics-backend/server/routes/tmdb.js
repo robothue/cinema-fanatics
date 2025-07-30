@@ -58,6 +58,7 @@ router.get("/movie/:id", async (req, res) => {
     });
 
     res.json(data);
+    console.log("Fetching watch providers for:", id);
   } catch (err) {
     console.error("❌ Error fetching TMDb movie by ID:", err.message);
     res.status(500).json({ error: "Failed to fetch movie details." });
