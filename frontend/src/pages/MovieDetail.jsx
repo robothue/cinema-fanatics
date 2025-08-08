@@ -8,6 +8,7 @@ import CastList from "../components/MovieDetail/CastList";
 import WatchProviders from "../components/MovieDetail/WatchProviders";
 import SimilarMovies from "../components/MovieDetail/SimilarMovie";
 import Reviews from "../components/MovieDetail/Reviews";
+import YouTubeTrailer from "../components/MovieDetail/YoutubeTrailer";
 
 export default function MovieDetail() {
   const { id } = useParams();
@@ -39,8 +40,9 @@ export default function MovieDetail() {
         {/* Right column: plot, cast, providers, etc. */}
         <div className="md:col-span-2 space-y-8">
           <MovieOverview overview={movie.overview} />
+          <YouTubeTrailer movieId={movie.id} movieTitle={movie.title} />
+          {/* <WatchProviders id={id} /> */}
           <CastList cast={movie.credits.cast} />
-          <WatchProviders id={id} />
           <Reviews movieId={id} />
           <SimilarMovies movies={movie.similar.results} />
         </div>

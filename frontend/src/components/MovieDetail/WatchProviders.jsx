@@ -11,7 +11,7 @@ const providerColors = {
   YouTube: "border-red-600",
 };
 
-export default function WatchProviders({ id }) {
+export default function WatchProviders({ id, movieTitle }) {
   const [providers, setProviders] = useState(null);
 
   useEffect(() => {
@@ -55,34 +55,46 @@ export default function WatchProviders({ id }) {
   if (!providers || providers.length === 0) return null;
 
   return (
-    <section className="p-8 max-w-6xl mx-auto">
-      <h2 className="text-2xl font-bold text-white mb-4">Where to Watch</h2>
+    <section className="px-4 max-w-6xl mx-auto">
+      <h2 className="text-lg font-semibold text-white mb-2">Available On</h2>
 
-      <div className="flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600">
+      <div className="flex items-center gap-6 overflow-x-auto no-scrollbar">
         {providers.map((provider) => {
           const colorClass =
             providerColors[provider.provider_name] || "border-gray-600";
-          const tooltip = `${provider.provider_name} - ${provider.type}`;
 
           return (
             <a
               key={provider.provider_id}
-              href={provider.display_priority < 10 ? `https://www.google.com/search?q=${provider.provider_name}+watch` : "#"}
+              href={`https://www.google.com/search?q=${provider.provider_name}+watch`}
               target="_blank"
               rel="noopener noreferrer"
-              title={tooltip}
-              className="flex flex-col items-center text-center"
+              className="flex flex-col items-center justify-center text-center flex-shrink-0 w-20"
+              title={`${provider.provider_name} - ${provider.type}`}
             >
               <img
                 src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`}
                 alt={provider.provider_name}
-                className={`w-12 h-12 object-contain mb-1 rounded-full border-2 ${colorClass}`}
+                className={`w-12 h-12 object-contain rounded-full border-2 ${colorClass} mb-1`}
               />
-              <span className="text-xs text-gray-300">{provider.provider_name}</span>
-              <span className="text-[10px] text-gray-400 capitalize">{provider.type}</span>
+              <span className="text-xs text-gray-300 truncate">
+                {provider.provider_name}
+              </span>
             </a>
           );
         })}
+
+        {/* MovieBox Button */}
+        <a
+          href={`https://movieboxpro.app/search?q=${encodeURIComponent(
+            movieTitle || "movie"
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-shrink-0 w-20 h-20 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition"
+        >
+          MovieBox
+        </a>
       </div>
     </section>
   );

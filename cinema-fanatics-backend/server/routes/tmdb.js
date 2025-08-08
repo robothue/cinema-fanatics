@@ -79,6 +79,39 @@ router.get("/movie/:id/providers", async (req, res) => {
   }
 });
 
+// This is routes for reviews in movie details page
+router.get("/movie/:id/reviews", async (req, res) => {
+  const movieId = req.params.id;
+  try {
+    const response = await axios.get(
+      `https://api.themoviedb.org/3/movie/${movieId}/reviews`,
+      {
+        params: {
+          api_key: process.env.TMDB_API_KEY,
+        },
+      }
+    );
+    res.json(response.data.results);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch reviews" });
+  }
+});
+
+// Get movie videos (for trailers, teasers, etc.)
+router.get("/movie/:id/videos", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data } = await axios.get(`${TMDB_API}/movie/${id}/videos`, {
+      params: {
+        api_key: API_KEY,
+      },
+    });
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch movie videos." });
+  }
+});
 
 
 module.exports = router;

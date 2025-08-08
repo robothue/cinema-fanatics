@@ -1,11 +1,11 @@
-// src/components/SimilarMovies.jsx
+// src/components/MovieDetail/SimilarMovies.jsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function SimilarMovies({ movies }) {
   const [page, setPage] = useState(0);
-  const pageSize = 5;
+  const pageSize = 6;
 
   const startIndex = page * pageSize;
   const currentMovies = movies.slice(startIndex, startIndex + pageSize);
@@ -16,56 +16,50 @@ export default function SimilarMovies({ movies }) {
   };
 
   return (
-    <section className="p-8 max-w-6xl mx-auto">
+    <section className="px-6 py-10 max-w-6xl mx-auto">
       <h2 className="text-2xl font-bold text-white mb-6">Similar Movies</h2>
 
-      <div className="grid grid-cols-6 gap-4 items-start">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
         <AnimatePresence mode="wait">
-          {currentMovies.map((m) => (
+          {currentMovies.map((movie) => (
             <motion.div
-              key={m.id}
+              key={movie.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="col-span-1"
+              className="bg-[#121212] rounded-lg overflow-hidden shadow hover:shadow-lg hover:scale-[1.03] transition-all"
             >
-              <Link
-                to={`/movies/${m.id}`}
-                className="block rounded-lg hover:scale-105 transition-transform"
-              >
+              <Link to={`/movies/${movie.id}`}>
                 <img
                   src={
-                    m.poster_path
-                      ? `https://image.tmdb.org/t/p/w200${m.poster_path}`
-                      : "https://via.placeholder.com/200x300?text=No+Image"
+                    movie.poster_path
+                      ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
+                      : "https://via.placeholder.com/300x450?text=No+Image"
                   }
-                  alt={m.title}
-                  className="rounded w-full h-[225px] object-cover"
+                  alt={movie.title}
+                  className="w-full h-[250px] object-cover"
                 />
-                <p className="text-xs text-white text-center mt-1 line-clamp-2">
-                  {m.title}
-                </p>
+                <div className="p-2">
+                  <p className="text-sm text-white font-medium text-center line-clamp-2">
+                    {movie.title}
+                  </p>
+                </div>
               </Link>
             </motion.div>
           ))}
         </AnimatePresence>
+      </div>
 
-        <motion.div
-          key="show-more"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          className="col-span-1 flex justify-center items-center"
+      <div className="flex justify-center mt-8">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleShowMore}
+          className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-full transition-all shadow-md"
         >
-          <button
-            onClick={handleShowMore}
-            className="bg-black hover:bg-red-600 text-white px-4 py-2 rounded-lg transition"
-          >
-            Show {hasNextPage ? "More" : "Less"}
-          </button>
-        </motion.div>
+          Show {hasNextPage ? "More" : "Less"}
+        </motion.button>
       </div>
     </section>
   );
