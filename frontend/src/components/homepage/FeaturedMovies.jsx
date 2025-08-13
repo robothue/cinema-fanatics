@@ -7,11 +7,10 @@ export default function FeaturedMovies() {
   const perPage = 6;
 
   useEffect(() => {
-    console.log("🔄 useEffect triggered");
     axios
       .get("http://localhost:5000/api/tmdb/featured")
       .then((res) => {
-        console.log("✅ Fetched movies:", res.data);
+        // console.log("✅ Fetched movies:", res.data);
         setMovies(res.data);
       })
       .catch((err) =>

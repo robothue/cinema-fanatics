@@ -45,6 +45,24 @@ router.get("/tv", async (req, res) => {
   }
 });
 
+// All Movies route in the server
+router.get("/movies", async (req, res) => {
+  try {
+    const page = req.query.page || 1;
+    const { data } = await axios.get(`${TMDB_API}/discover/movie`, {
+      params: {
+        api_key: API_KEY,
+        sort_by: req.query.sort_by || "popularity.desc",
+        page,
+      },
+    });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch movies." });
+  }
+});
+
+
 //Moviedetails.jsx
 router.get("/movie/:id", async (req, res) => {
   const { id } = req.params;
@@ -112,6 +130,7 @@ router.get("/movie/:id/videos", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch movie videos." });
   }
 });
+
 
 
 module.exports = router;
