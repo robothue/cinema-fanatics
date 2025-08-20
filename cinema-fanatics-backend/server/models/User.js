@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
   },
   password: String, // Not required if using Google only,
+  picture: String,
   googleId: String, // Optional for Google OAuth users
 }, { timestamps: true });
 

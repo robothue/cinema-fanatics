@@ -1,5 +1,5 @@
 import HeroSection from "../components/homepage/HeroSection";
-import Navbar from "../components/homepage/Navbar";
+import Navbar from "../components/Navbar/Navbar";
 import FeaturedMovies from "../components/homepage/FeaturedMovies";
 import TrendingNow from "../components/homepage/TrendingNow";
 import FansFavourite from "../components/homepage/FansFavourite";
@@ -21,8 +21,6 @@ export default function Home() {
       <ActionMovies />
       <GenreFilters />
       <TVShows />
-      <Newsletter />
-      <Footer />
       
     </div>
   );

@@ -82,12 +82,25 @@ exports.googleAuth = async (req, res) => {
     });
 
     const payload = ticket.getPayload();
-    const { email, name, sub: googleId } = payload;
+    const { email, name, sub: googleId, picture } = payload; // 👈 picture is here
 
     let user = await User.findOne({ email });
 
     if (!user) {
-      user = await User.create({ name, email, googleId });
+      // create new user with picture
+      user = await User.create({ name, email, googleId, picture });
+    } else {
+      // update Google fields if needed (keep profile pic fresh)
+      let changed = false;
+      if (!user.googleId) {
+        user.googleId = googleId;
+        changed = true;
+      }
+      if (picture && user.picture !== picture) {
+        user.picture = picture;
+        changed = true;
+      }
+      if (changed) await user.save();
     }
 
     const token = createToken(user._id);
@@ -99,6 +112,7 @@ exports.googleAuth = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        picture: user.picture, // 👈 return it
       },
     });
   } catch (err) {
@@ -107,5 +121,37 @@ exports.googleAuth = async (req, res) => {
       message: "Google authentication failed",
       error: err.message,
     });
+  }
+};
+
+// ✅ Get Current User
+exports.me = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Invalid token format" });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    const user = await User.findById(decoded.userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      picture: user.picture, // ✅ return picture
+    });
+  } catch (err) {
+    console.error("❌ /me error:", err);
+    return res.status(401).json({ message: "Unauthorized", error: err.message });
   }
 };

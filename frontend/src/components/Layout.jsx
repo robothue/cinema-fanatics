@@ -1,6 +1,6 @@
 // src/components/Layout.jsx
 //This one is for the whole pages layout
-import Navbar from "./homepage/Navbar";
+import Navbar from "./Navbar/Navbar";
 import Newsletter from "./homepage/Newsletter";
 import Footer from "./homepage/Footer";
 import { Outlet } from "react-router-dom";
