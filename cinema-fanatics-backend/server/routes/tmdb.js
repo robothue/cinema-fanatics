@@ -10,18 +10,30 @@ const API_KEY = process.env.TMDB_API_KEY;
 //All of these routes are for TMDB API
 router.get("/featured", async (req, res) => {
   try {
-            const allResults = [];
-        for (let i = 1; i <= 3; i++) {
-          const { data } = await axios.get(`${TMDB_API}/movie/top_rated`, {
-            params: { api_key: API_KEY, page: i },
-          });
-          allResults.push(...data.results);
-        }
-        res.json(allResults.slice(0, 60));
+    const fetchCategory = async (url, tag) => {
+      const { data } = await axios.get(url, { params: { api_key: API_KEY, page: 1 } });
+      return data.results.map(item => ({ ...item, tag }));
+    };
+
+    const categories = await Promise.all([
+      fetchCategory(`${TMDB_API}/movie/top_rated`, "Top Rated Movie"),
+      fetchCategory(`${TMDB_API}/tv/top_rated`, "Top Rated TV"),
+      fetchCategory(`${TMDB_API}/trending/movie/week`, "Trending Movie"),
+      fetchCategory(`${TMDB_API}/trending/tv/week`, "Trending TV"),
+      fetchCategory(`${TMDB_API}/movie/popular`, "Popular Movie"),
+      fetchCategory(`${TMDB_API}/tv/popular`, "Popular TV"),
+    ]);
+
+    const combined = categories.flat();
+    const shuffled = combined.sort(() => Math.random() - 0.5);
+
+    res.json(shuffled.slice(0, 60));
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch featured movies." });
+    console.error("❌ Error fetching featured content:", err.message);
+    res.status(500).json({ error: "Failed to fetch featured content." });
   }
 });
+
 
 router.get("/trending", async (req, res) => {
   try {
