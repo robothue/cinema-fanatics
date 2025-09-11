@@ -24,6 +24,7 @@ export default function App() {
             <Route path="/tv" element={<AllTvShows />} /> {/* ✅ TV Shows page */}
 
             {/* ✅ handle both movies & tv */}
+            <Route path="/:media_type/:id" element={<MovieDetail />} />
             <Route path="/movies/:id" element={<MovieDetail />} />
             <Route path="/tv/:id" element={<MovieDetail />} />
 
