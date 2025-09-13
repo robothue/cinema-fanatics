@@ -4,13 +4,12 @@ import Home from "./pages/Home";
 import AuthPage from "./pages/AuthPage";
 import MovieDetail from "./pages/MovieDetail";
 import AllMovies from "./pages/AllMovies";
-import AllTvShows from "./pages/AllTvShows"; // ✅ new import
+import AllTvShows from "./pages/AllTvShows";
 import MyWatchlist from "./pages/MyWatchlist";
 import Layout from "./components/Layout";
 import PrivateRoute from "./components/PrivateRoute";
-
-// ✅ new import
 import WatchProviders from "./components/MovieDetail/WatchProviders";
+import Profile from "./pages/Profile"; // ✅ import
 
 export default function App() {
   return (
@@ -21,7 +20,7 @@ export default function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
             <Route path="/movies" element={<AllMovies />} />
-            <Route path="/tv" element={<AllTvShows />} /> {/* ✅ TV Shows page */}
+            <Route path="/tv" element={<AllTvShows />} />
 
             {/* ✅ handle both movies & tv */}
             <Route path="/:media_type/:id" element={<MovieDetail />} />
@@ -33,6 +32,15 @@ export default function App() {
               element={
                 <PrivateRoute>
                   <MyWatchlist />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <Profile />
                 </PrivateRoute>
               }
             />

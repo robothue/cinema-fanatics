@@ -4,13 +4,13 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const morgan = require("morgan");
+const path = require("path")
 
 //Routes
 const movieRoutes = require("./routes/movieRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const authRoutes = require("./routes/authRoutes");
 const tmdbRoutes = require("./routes/tmdb");
-
 
 //This one is for env file
 dotenv.config();
@@ -25,6 +25,7 @@ app.use("/api/movies", movieRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/tmdb", tmdbRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve uploads folder as static
 
 
 

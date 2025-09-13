@@ -155,3 +155,36 @@ exports.me = async (req, res) => {
     return res.status(401).json({ message: "Unauthorized", error: err.message });
   }
 };
+
+//Profile updating
+exports.updateMe = async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    // Update fields
+    if (name) req.user.name = name;
+
+    // Handle file upload (local or cloudinary)
+    if (req.file) {
+      if (process.env.UPLOAD_DRIVER === "cloudinary") {
+        // Cloudinary already gives a URL
+        req.user.picture = req.file.path;
+      } else {
+        // Local: serve via /uploads route
+        req.user.picture = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+      }
+    }
+
+    await req.user.save();
+
+    res.json({
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      picture: req.user.picture,
+    });
+  } catch (err) {
+    console.error("❌ Update profile error:", err);
+    res.status(500).json({ message: "Profile update failed", error: err.message });
+  }
+};
