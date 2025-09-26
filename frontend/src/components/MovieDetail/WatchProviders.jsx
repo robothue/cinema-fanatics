@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 
 const providerColors = {
@@ -11,22 +12,26 @@ const providerColors = {
   YouTube: "border-red-600",
 };
 
-export default function WatchProviders({ id, movieTitle }) {
+export default function WatchProviders() {
+  const { type, id } = useParams(); // ✅ get :type and :id from route
   const [providers, setProviders] = useState(null);
 
   useEffect(() => {
     async function fetchProviders() {
       try {
-        const { data } = await axios.get(`/api/tmdb/movie/${id}/providers`);
+        const { data } = await axios.get(
+          `http://localhost:5000/api/tmdb/${type}/${id}/providers`
+        );
+
         const region = data.results?.KE || data.results?.US || null;
 
         if (region) {
           const allProviders = [];
 
-          ["flatrate", "buy", "rent"].forEach((type) => {
-            if (region[type]) {
-              region[type].forEach((p) => {
-                allProviders.push({ ...p, type });
+          ["flatrate", "buy", "rent"].forEach((t) => {
+            if (region[t]) {
+              region[t].forEach((p) => {
+                allProviders.push({ ...p, type: t });
               });
             }
           });
@@ -41,16 +46,18 @@ export default function WatchProviders({ id, movieTitle }) {
 
           setProviders(sortedProviders.slice(0, 5));
         } else {
-          setProviders(null);
+          setProviders([]);
         }
       } catch (err) {
         console.error("Failed to fetch watch providers", err);
-        setProviders(null);
+        setProviders([]);
       }
     }
 
-    fetchProviders();
-  }, [id]);
+    if (id && type) {
+      fetchProviders();
+    }
+  }, [id, type]);
 
   if (!providers || providers.length === 0) return null;
 
@@ -83,18 +90,6 @@ export default function WatchProviders({ id, movieTitle }) {
             </a>
           );
         })}
-
-        {/* MovieBox Button */}
-        <a
-          href={`https://movieboxpro.app/search?q=${encodeURIComponent(
-            movieTitle || "movie"
-          )}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-shrink-0 w-20 h-20 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition"
-        >
-          MovieBox
-        </a>
       </div>
     </section>
   );

@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Reviews({ movieId }) {
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState("");
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editContent, setEditContent] = useState("");
 
+  // Fetch reviews
   useEffect(() => {
     const fetchReviews = async () => {
       try {
@@ -18,19 +21,40 @@ export default function Reviews({ movieId }) {
     fetchReviews();
   }, [movieId]);
 
+  // Add new review
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!newReview.trim()) return;
 
     const newItem = {
       author: "You",
-      avatar_url: "/default-avatar.png", // Replace with real user profile pic later
+      avatar_url: "/default-avatar.png", // Replace later with actual user
       content: newReview,
       created_at: new Date().toISOString(),
     };
 
     setReviews([newItem, ...reviews.slice(0, 5)]);
     setNewReview("");
+  };
+
+  // Delete review
+  const handleDelete = (index) => {
+    setReviews(reviews.filter((_, i) => i !== index));
+  };
+
+  // Start editing review
+  const handleEdit = (index) => {
+    setEditingIndex(index);
+    setEditContent(reviews[index].content);
+  };
+
+  // Save edited review
+  const handleSave = (index) => {
+    const updated = [...reviews];
+    updated[index].content = editContent;
+    setReviews(updated);
+    setEditingIndex(null);
+    setEditContent("");
   };
 
   return (
@@ -56,37 +80,86 @@ export default function Reviews({ movieId }) {
 
       {/* Reviews grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {reviews.map((r, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className="bg-white rounded-xl border border-gray-100 shadow p-5"
-          >
-            <div className="flex items-start gap-4 mb-3">
-              {/* Avatar image */}
-              <img
-                src={
-                  r.avatar_url ||
-                  "https://ui-avatars.com/api/?name=User&background=random"
-                }
-                alt={r.author}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-              <div className="flex flex-col">
-                <span className="font-semibold text-gray-800">{r.author}</span>
-                <span className="text-xs text-gray-500">
-                  {new Date(r.created_at).toLocaleDateString()}
-                </span>
+        <AnimatePresence>
+          {reviews.map((r, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ delay: index * 0.05 }}
+              className="bg-white rounded-xl border border-gray-100 shadow p-5"
+            >
+              <div className="flex items-start gap-4 mb-3">
+                {/* Avatar image */}
+                <img
+                  src={
+                    r.avatar_url ||
+                    "https://ui-avatars.com/api/?name=User&background=random"
+                  }
+                  alt={r.author}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                <div className="flex flex-col">
+                  <span className="font-semibold text-gray-800">{r.author}</span>
+                  <span className="text-xs text-gray-500">
+                    {new Date(r.created_at).toLocaleDateString()}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <p className="text-gray-700 text-sm leading-relaxed">
-              {r.content.length > 200 ? r.content.slice(0, 200) + "..." : r.content}
-            </p>
-          </motion.div>
-        ))}
+              {/* Review text (edit mode or normal mode) */}
+              {editingIndex === index ? (
+                <div>
+                  <textarea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    className="w-full bg-gray-50 border rounded-lg p-3 text-sm resize-none"
+                    rows={3}
+                  />
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => handleSave(index)}
+                      className="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setEditingIndex(null)}
+                      className="px-3 py-1 bg-gray-400 text-white text-sm rounded-lg hover:bg-gray-500"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  {r.content.length > 200
+                    ? r.content.slice(0, 200) + "..."
+                    : r.content}
+                </p>
+              )}
+
+              {/* Action buttons */}
+              {r.author === "You" && editingIndex !== index && (
+                <div className="flex gap-3 mt-3">
+                  <button
+                    onClick={() => handleEdit(index)}
+                    className="text-blue-600 text-sm hover:underline"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(index)}
+                    className="text-red-600 text-sm hover:underline"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </section>
   );

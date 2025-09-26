@@ -22,10 +22,8 @@ export default function App() {
             <Route path="/movies" element={<AllMovies />} />
             <Route path="/tv" element={<AllTvShows />} />
 
-            {/* ✅ handle both movies & tv */}
+            {/* ✅ Single route for both */}
             <Route path="/:media_type/:id" element={<MovieDetail />} />
-            <Route path="/movies/:id" element={<MovieDetail />} />
-            <Route path="/tv/:id" element={<MovieDetail />} />
 
             <Route
               path="/watchlist"

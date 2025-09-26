@@ -51,7 +51,7 @@ export default function MovieDetail() {
           <MovieOverview overview={item.overview} />
           <YouTubeTrailer movieId={item.id} movieTitle={item.title} />
           <CastList cast={item.credits?.cast || []} />
-          <Reviews movieId={id} /> {/* 🔧 later update to support TV reviews too */}
+          <Reviews id={id} mediaType={media_type} />{/* 🔧 later update to support TV reviews too */}
           <SimilarMovies movies={item.similar?.results || []} />
           {/* If you want providers for TV too */}
           {/* <WatchProviders id={id} mediaType={media_type} /> */}
