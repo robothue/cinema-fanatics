@@ -1,90 +1,86 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function TVShows() {
-  const [tvShows, setTvShows] = useState([]);
+export default function MediaSection({
+  title,
+  fetchUrl,
+  filterFn = (items) => items, // default: no filter
+  sortFn = null, // default: no sorting
+  itemsPerPage = 6,
+}) {
+  const [items, setItems] = useState([]);
   const [page, setPage] = useState(0);
-  const ITEMS_PER_PAGE = 6;
-  const navigate = useNavigate();
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/tmdb/tv")
+      .get(fetchUrl)
       .then((res) => {
-        const all = res.data;
+        let results = res.data;
 
-        // ✅ Keep only TV shows
-        const tv = all.filter(
-          (item) => item.media_type === "tv" || item.first_air_date
-        );
+        // apply filter if provided
+        results = filterFn(results);
 
-        if (tv.length > 0) {
-          setTvShows(tv);
-        } else {
-          const start = Math.floor(all.length / 3);
-          setTvShows(all.slice(start, start + 12));
+        // apply sorting if provided
+        if (sortFn) {
+          results = results.sort(sortFn);
         }
-      })
-      .catch((err) => console.error("TVShows fetch error:", err));
-  }, []);
 
-  const totalPages = Math.ceil(tvShows.length / ITEMS_PER_PAGE);
-  const start = page * ITEMS_PER_PAGE;
-  const currentShows = tvShows.slice(start, start + ITEMS_PER_PAGE);
+        setItems(results);
+      })
+      .catch((err) => console.error(`${title} fetch error:`, err));
+  }, [fetchUrl, title, filterFn, sortFn]);
+
+  const totalPages = Math.ceil(items.length / itemsPerPage);
+  const start = page * itemsPerPage;
+  const currentItems = items.slice(start, start + itemsPerPage);
 
   const handleNext = () => {
     setPage((prev) => (prev + 1) % totalPages);
   };
 
-  const handleClick = (id) => {
-    navigate(`/tv/${id}`);
-  };
-
   return (
     <section className="bg-white text-black py-14 px-6 md:px-16">
       <h2 className="text-2xl md:text-3xl font-bold mb-6 tracking-tight">
-        TV Shows
+        {title}
       </h2>
 
-      {tvShows.length === 0 ? (
-        <p className="text-gray-500">No TV shows available at the moment.</p>
+      {items.length === 0 ? (
+        <p className="text-gray-500">No {title} available at the moment.</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-4 md:gap-6">
           <AnimatePresence mode="wait">
-            {currentShows.map((show) => (
+            {currentItems.map((item) => (
               <motion.div
-                key={show.id}
+                key={item.id}
                 layout
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
-                onClick={() => handleClick(show.id)}
-                className="bg-white rounded-lg border border-gray-200 hover:shadow-md transition group overflow-hidden cursor-pointer"
+                className="bg-white rounded-lg border border-gray-200 hover:shadow-md transition group overflow-hidden"
               >
                 <img
-                  src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
-                  alt={show.title || show.name}
+                  src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+                  alt={item.title || item.name}
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="p-2">
                   <h3 className="text-xs md:text-sm font-semibold truncate">
-                    {show.title || show.name}
+                    {item.title || item.name}
                   </h3>
                   <div className="flex justify-between text-[11px] md:text-xs text-gray-500 mt-1">
                     <span>
-                      ⭐ {show.vote_average ? show.vote_average.toFixed(1) : "N/A"}
+                      ⭐ {item.vote_average ? item.vote_average.toFixed(1) : "N/A"}
                     </span>
-                    <span>{show.release_date || show.first_air_date}</span>
+                    <span>{item.release_date || item.first_air_date}</span>
                   </div>
                 </div>
               </motion.div>
             ))}
           </AnimatePresence>
 
-          {/* See More button */}
+          {/* See More */}
           <div className="flex items-center justify-center border border-dashed border-red-500 rounded-md hover:bg-red-50 transition cursor-pointer">
             <button
               onClick={handleNext}

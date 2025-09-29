@@ -134,23 +134,30 @@ router.get("/tv/:id/videos", async (req, res) => {
 
 
 /**
- * ✅ Movies list
+ * ✅ Movies list (discover with filters)
  */
 router.get("/movies", async (req, res) => {
   try {
     const page = req.query.page || 1;
+    const sort_by = req.query.sort_by || "popularity.desc";
+    const with_genres = req.query.with_genres; // 🎯 NEW
+
     const { data } = await axios.get(`${TMDB_API}/discover/movie`, {
       params: {
         api_key: API_KEY,
-        sort_by: req.query.sort_by || "popularity.desc",
+        sort_by,
         page,
+        with_genres, // 🎯 Pass genre filter if provided
       },
     });
+
     res.json(data);
   } catch (err) {
+    console.error("❌ Error fetching movies:", err.message);
     res.status(500).json({ error: "Failed to fetch movies." });
   }
 });
+
 
 /**
  * ✅ Movie Details
@@ -275,5 +282,96 @@ router.get("/search/tv", async (req, res) => {
     res.status(500).json({ error: "Failed to search TV shows." });
   }
 });
+
+
+/**
+ * ✅ Fetch Genres (Movies + TV)
+ */
+router.get("/genres", async (req, res) => {
+  try {
+    // Fetch both movie + tv genres
+    const [movieGenres, tvGenres] = await Promise.all([
+      axios.get(`${TMDB_API}/genre/movie/list`, { params: { api_key: API_KEY } }),
+      axios.get(`${TMDB_API}/genre/tv/list`, { params: { api_key: API_KEY } }),
+    ]);
+
+    // Merge + remove duplicates
+    const combined = [...movieGenres.data.genres, ...tvGenres.data.genres];
+    const unique = Array.from(new Map(combined.map(g => [g.id, g])).values());
+
+    res.json({ genres: unique });
+  } catch (err) {
+    console.error("❌ Error fetching genres:", err.message);
+    res.status(500).json({ error: "Failed to fetch genres" });
+  }
+});
+
+
+/**
+ * ✅ Discover movies by genre
+ */
+router.get("/discover", async (req, res) => {
+  try {
+    const { with_genres, page = 1 } = req.query;
+
+    const { data } = await axios.get(`${TMDB_API}/discover/movie`, {
+      params: {
+        api_key: API_KEY,
+        with_genres, // e.g. 28 for Action
+        sort_by: "popularity.desc",
+        page,
+      },
+    });
+
+    res.json(data);
+  } catch (err) {
+    console.error("❌ Error fetching discover movies:", err.message);
+    res.status(500).json({ error: "Failed to fetch discover movies." });
+  }
+});
+
+
+/**
+ * ✅ Discover Movies + TV by Genre
+ * /api/tmdb/discover/genre/:genreId?page=1
+ */
+router.get("/discover/genre/:genreId", async (req, res) => {
+  const { genreId } = req.params;
+  const { page = 1 } = req.query;
+
+  try {
+    // Fetch movies + tv shows with given genre
+    const [moviesRes, tvRes] = await Promise.all([
+      axios.get(`${TMDB_API}/discover/movie`, {
+        params: { api_key: API_KEY, with_genres: genreId, page },
+      }),
+      axios.get(`${TMDB_API}/discover/tv`, {
+        params: { api_key: API_KEY, with_genres: genreId, page },
+      }),
+    ]);
+
+    // Normalize data (so frontend can handle both easily)
+    const normalize = (items, type) =>
+      items.map(item => ({
+        id: item.id,
+        title: item.title || item.name, // movie = title, tv = name
+        poster_path: item.poster_path,
+        release_date: item.release_date || item.first_air_date,
+        media_type: type, // movie or tv
+      }));
+
+    const combined = [
+      ...normalize(moviesRes.data.results, "movie"),
+      ...normalize(tvRes.data.results, "tv"),
+    ];
+
+    res.json({ results: combined });
+  } catch (err) {
+    console.error("❌ Error fetching by genre:", err.message);
+    res.status(500).json({ error: "Failed to fetch by genre" });
+  }
+});
+
+
 
 module.exports = router;
