@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 const navItems = [
   { label: "HOME", path: "/" },
   { label: "MOVIES", path: "/movies" },
-  { label: "TV SHOWS", path: "/shows" },
+  { label: "TV SHOWS", path: "/tv" },
   { label: "NEWS", path: "/news" },
   { label: "WATCHLIST", path: "/watchlist" },
 ];

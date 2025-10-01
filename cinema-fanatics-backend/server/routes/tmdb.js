@@ -135,29 +135,53 @@ router.get("/tv/:id/videos", async (req, res) => {
 
 /**
  * ✅ Movies list (discover with filters)
+ * Example: /api/tmdb/movies?query=batman&with_genres=28&primary_release_year=2023&with_original_language=en&vote_average.gte=7&sort_by=popularity.desc&page=1
  */
+/ GET /api/tmdb/movies
 router.get("/movies", async (req, res) => {
+  const {
+    page = 1,
+    search,
+    genres,
+    year,
+    language,
+    minRating,
+    sortBy = "rating_desc",
+  } = req.query;
+
   try {
-    const page = req.query.page || 1;
-    const sort_by = req.query.sort_by || "popularity.desc";
-    const with_genres = req.query.with_genres; // 🎯 NEW
+    let url = `https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_API_KEY}&page=${page}`;
 
-    const { data } = await axios.get(`${TMDB_API}/discover/movie`, {
-      params: {
-        api_key: API_KEY,
-        sort_by,
-        page,
-        with_genres, // 🎯 Pass genre filter if provided
-      },
-    });
+    // 🔍 Search by title
+    if (search) {
+      url = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&page=${page}&query=${encodeURIComponent(
+        search
+      )}`;
+    }
 
-    res.json(data);
+    // Add filters
+    if (year) url += `&primary_release_year=${year}`;
+    if (language) url += `&with_original_language=${language}`;
+    if (genres) url += `&with_genres=${genres}`; // expect comma-separated genre IDs
+    if (minRating) url += `&vote_average.gte=${minRating}`;
+
+    // Sorting
+    const sortMap = {
+      rating_desc: "vote_average.desc",
+      rating_asc: "vote_average.asc",
+      year_desc: "primary_release_date.desc",
+      year_asc: "primary_release_date.asc",
+    };
+    url += `&sort_by=${sortMap[sortBy] || "popularity.desc"}`;
+
+    // Fetch from TMDb
+    const response = await axios.get(url);
+    res.json(response.data);
   } catch (err) {
-    console.error("❌ Error fetching movies:", err.message);
-    res.status(500).json({ error: "Failed to fetch movies." });
+    console.error("❌ TMDb fetch error:", err.message);
+    res.status(500).json({ error: "Failed to fetch movies" });
   }
 });
-
 
 /**
  * ✅ Movie Details
