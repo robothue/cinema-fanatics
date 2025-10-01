@@ -13,18 +13,23 @@ export default function MyWatchlist() {
     searchTerm: ""
   });
 
+  // dummy user until auth is ready
+  const userId = "123";
+
+  // ✅ Fetch watchlist from backend
   useEffect(() => {
-    axios.get("/api/watchlist")
+    axios.get(`http://localhost:5000/api/watchlist/${userId}`)
       .then(res => setMovies(res.data))
-      .catch(err => console.error(err));
+      .catch(err => console.error("❌ Error fetching watchlist:", err));
   }, []);
 
-  const handleRemove = async (id) => {
+  // ✅ Remove movie by tmdbId
+  const handleRemove = async (tmdbId) => {
     try {
-      await axios.delete(`/api/watchlist/${id}`);
-      setMovies(prev => prev.filter(m => m.id !== id));
+      await axios.delete(`http://localhost:5000/api/watchlist/${userId}/${tmdbId}`);
+      setMovies(prev => prev.filter(m => m.tmdbId !== tmdbId));
     } catch (err) {
-      console.error(err);
+      console.error("❌ Error removing movie:", err);
     }
   };
 

@@ -11,7 +11,7 @@ const movieRoutes = require("./routes/movieRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const authRoutes = require("./routes/authRoutes");
 const tmdbRoutes = require("./routes/tmdb");
-
+const WatchlistRoutes = require("./routes/Watchlist")
 //This one is for env file
 dotenv.config();
 
@@ -26,7 +26,7 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/tmdb", tmdbRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve uploads folder as static
-
+app.use("/api/Watchlist", WatchlistRoutes);
 
 
 // Test route

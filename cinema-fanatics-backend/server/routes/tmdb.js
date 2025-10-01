@@ -137,7 +137,7 @@ router.get("/tv/:id/videos", async (req, res) => {
  * ✅ Movies list (discover with filters)
  * Example: /api/tmdb/movies?query=batman&with_genres=28&primary_release_year=2023&with_original_language=en&vote_average.gte=7&sort_by=popularity.desc&page=1
  */
-/ GET /api/tmdb/movies
+// GET /api/tmdb/movies
 router.get("/movies", async (req, res) => {
   const {
     page = 1,
@@ -150,11 +150,11 @@ router.get("/movies", async (req, res) => {
   } = req.query;
 
   try {
-    let url = `https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_API_KEY}&page=${page}`;
+    let url = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}`;
 
     // 🔍 Search by title
     if (search) {
-      url = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&page=${page}&query=${encodeURIComponent(
+      url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&page=${page}&query=${encodeURIComponent(
         search
       )}`;
     }

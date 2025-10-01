@@ -1,7 +1,10 @@
 import { Star, Play } from "lucide-react";
+import axios from "axios";
+import { useState } from "react";
 
 export default function MovieHeader({ movie }) {
   const {
+    id,
     title,
     release_date,
     runtime,
@@ -13,6 +16,9 @@ export default function MovieHeader({ movie }) {
     original_language,
   } = movie;
 
+  const [adding, setAdding] = useState(false);
+  const [added, setAdded] = useState(false);
+
   const year = release_date?.split("-")[0];
   const hours = Math.floor(runtime / 60);
   const minutes = runtime % 60;
@@ -20,8 +26,28 @@ export default function MovieHeader({ movie }) {
   const language =
     spoken_languages?.[0]?.english_name || original_language?.toUpperCase();
 
-  // Certification placeholder (we can replace this with real data from TMDb certifications endpoint)
+  // Certification placeholder
   const certification = "PG-13";
+
+  const handleAddToWatchlist = async () => {
+    try {
+      await axios.post("http://localhost:5000/api/watchlist", {
+        userId: "123", // dummy user
+        tmdbId: movie.id,
+        title: movie.title,
+        year: movie.release_date?.split("-")[0],
+        rating: movie.vote_average,
+        posterUrl: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+        genre: movie.genres?.map(g => g.name) || [],
+        watched: false,
+      });
+      alert("✅ Added to watchlist!");
+    } catch (err) {
+      console.error("Failed to add to watchlist:", err);
+      alert("❌ Already in watchlist or error occurred.");
+    }
+  };
+  
 
   return (
     <div className="flex flex-col md:flex-row bg-white rounded-2xl shadow-md overflow-hidden p-4 md:p-6">
@@ -76,8 +102,16 @@ export default function MovieHeader({ movie }) {
 
         {/* Action Buttons */}
         <div className="mt-4 flex gap-3 flex-wrap">
-          <button className="bg-indigo-600 hover:bg-indigo-500 transition text-white text-sm px-4 py-2 rounded-lg font-semibold shadow-sm">
-            + Add to Watchlist
+          <button
+            onClick={handleAddToWatchlist}
+            disabled={adding || added}
+            className={`${
+              added
+                ? "bg-green-600 hover:bg-green-500"
+                : "bg-indigo-600 hover:bg-indigo-500"
+            } transition text-white text-sm px-4 py-2 rounded-lg font-semibold shadow-sm disabled:opacity-70`}
+          >
+            {added ? "✓ Added" : adding ? "Adding..." : "+ Add to Watchlist"}
           </button>
           <button className="flex items-center gap-2 border border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition text-sm px-4 py-2 rounded-lg font-semibold shadow-sm">
             <Play size={16} />
