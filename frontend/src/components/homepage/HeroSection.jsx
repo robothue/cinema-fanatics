@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { motion } from "framer-motion"; // animations
-import { Play, Info } from "lucide-react"; // icons
+import { motion } from "framer-motion";
+import { Play } from "lucide-react";
+import WatchlistButton from "../Buttons/watchlistButton"; // ✅ import your button
 
 export default function HeroSection() {
   const [movies, setMovies] = useState([]);
@@ -46,17 +47,14 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          {/* Tag */}
           <span className="inline-block bg-red-600/90 px-3 py-1 rounded-full text-xs font-semibold mb-4 shadow-md tracking-wide uppercase">
             Featured
           </span>
 
-          {/* Title */}
           <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-4 drop-shadow-xl tracking-tight">
             {movie.title || movie.name}
           </h1>
 
-          {/* Extra info */}
           <div className="flex items-center gap-4 text-sm md:text-base text-gray-300 mb-6">
             <span>⭐ {movie.vote_average?.toFixed(1)}/10</span>
             <span>{movie.release_date || movie.first_air_date}</span>
@@ -65,27 +63,12 @@ export default function HeroSection() {
             )}
           </div>
 
-          {/* Overview */}
           <p className="text-sm md:text-lg text-gray-200 max-w-2xl mb-8 line-clamp-4 drop-shadow-md">
             {movie.overview}
           </p>
 
-          {/* Buttons */}
+          {/* ✅ Buttons */}
           <div className="flex gap-4">
-            
-            {/* <button
-              onClick={() =>
-                navigate(
-                  `/watch/${
-                    movie.media_type || (movie.title ? "movie" : "tv")
-                  }/${movie.id}`
-                )
-              }
-              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg font-semibold shadow-lg transition"
-            >
-              <Play size={20} /> Watch Now
-            </button> */}
-
             <button
               onClick={() =>
                 navigate(
@@ -98,6 +81,9 @@ export default function HeroSection() {
             >
               <Play size={20} /> Watch Now
             </button>
+
+            {/* ✅ Watchlist button added here */}
+            <WatchlistButton movie={movie} />
           </div>
         </motion.div>
       </div>
