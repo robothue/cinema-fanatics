@@ -1,4 +1,5 @@
 import { Star, Play } from "lucide-react";
+import WatchlistButton from "../Buttons/watchlistButton";
 import axios from "axios";
 import { useState } from "react";
 
@@ -102,17 +103,7 @@ export default function MovieHeader({ movie }) {
 
         {/* Action Buttons */}
         <div className="mt-4 flex gap-3 flex-wrap">
-          <button
-            onClick={handleAddToWatchlist}
-            disabled={adding || added}
-            className={`${
-              added
-                ? "bg-green-600 hover:bg-green-500"
-                : "bg-indigo-600 hover:bg-indigo-500"
-            } transition text-white text-sm px-4 py-2 rounded-lg font-semibold shadow-sm disabled:opacity-70`}
-          >
-            {added ? "✓ Added" : adding ? "Adding..." : "+ Add to Watchlist"}
-          </button>
+        <WatchlistButton movie={movie} /> {/* ✅ Replace old button here */}
           <button className="flex items-center gap-2 border border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition text-sm px-4 py-2 rounded-lg font-semibold shadow-sm">
             <Play size={16} />
             Watch Trailer

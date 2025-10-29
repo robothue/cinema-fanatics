@@ -4,20 +4,18 @@ const Watchlist = require("../models/Watchlist");
 
 const router = express.Router();
 
-// ✅ GET all watchlist items for a user
+
+// ✅ Get watchlist for logged-in user
 router.get("/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
     const items = await Watchlist.find({ userId });
     res.json(items);
   } catch (err) {
+    console.error("❌ Error fetching watchlist:", err);
     res.status(500).json({ error: "Failed to fetch watchlist" });
   }
 });
-
-
-
-
 // Add to watchlist
 router.post("/", async (req, res) => {
   try {
@@ -25,10 +23,15 @@ router.post("/", async (req, res) => {
 
     const newItem = new Watchlist({
       userId: req.body.userId,
-      movieId: req.body.movieId,
+      tmdbId: req.body.tmdbId,
       title: req.body.title,
-      posterPath: req.body.posterPath,
+      posterUrl: req.body.posterUrl,
+      year: req.body.year,
+      rating: req.body.rating,
+      genre: req.body.genre,
+      watched: req.body.watched || false,
     });
+    
 
     const savedItem = await newItem.save();
     console.log("✅ Watchlist item saved:", savedItem);
@@ -40,38 +43,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-
-
-
-
-
-// // ✅ POST add movie to watchlist
-// router.post("/", async (req, res) => {
-//   try {
-//     const { userId, tmdbId, title, posterUrl, year, rating, genre, watched } = req.body;
-
-//     // Prevent duplicates
-//     const exists = await Watchlist.findOne({ userId, tmdbId });
-//     if (exists) {
-//       return res.status(400).json({ error: "Movie already in watchlist" });
-//     }
-
-//     const newMovie = await Watchlist.create({
-//       userId,
-//       tmdbId,
-//       title,
-//       posterUrl,
-//       year,
-//       rating,
-//       genre,
-//       watched,
-//     });
-
-//     res.status(201).json(newMovie);
-//   } catch (err) {
-//     res.status(500).json({ error: "Failed to add movie" });
-//   }
-// });
 
 // ✅ DELETE movie from watchlist
 router.delete("/:userId/:tmdbId", async (req, res) => {
