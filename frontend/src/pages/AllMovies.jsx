@@ -23,10 +23,11 @@ const AllMovies = () => {
 
   return (
     <div className="flex gap-6 px-6 py-8 bg-white">
-      <FiltersSidebar
+       <FiltersSidebar
         filters={filters}
-        setFilters={setFilters}
-        onResults={handleResults} // ✅ now passed
+        onFiltersChange={(newFilters) =>
+          setFilters((prev) => ({ ...prev, ...newFilters }))
+        }
       />
       <main className="flex-1">
         <FeaturedGenres />

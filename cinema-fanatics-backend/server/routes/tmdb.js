@@ -7,6 +7,15 @@ const router = express.Router();
 const TMDB_API = "https://api.themoviedb.org/3";
 const API_KEY = process.env.TMDB_API_KEY;
 
+// Simple in-memory cache (resets on server restart)
+const cache = new Map();
+const CACHE_TTL = 1000 * 60 * 5; // 5 minutes
+
+function getCacheKey(url, params) {
+  return `${url}:${JSON.stringify(params)}`;
+}
+
+
 /**
  * ✅ Featured content
  */
@@ -150,33 +159,42 @@ router.get("/movies", async (req, res) => {
   } = req.query;
 
   try {
-    let url = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}`;
+    let url = `${TMDB_API}/discover/movie`;
+    const params = {
+      api_key: API_KEY,
+      page,
+      ...(year && { primary_release_year: year }),
+      ...(language && { with_original_language: language }),
+      ...(genres && { with_genres: genres }),
+      ...(minRating && { "vote_average.gte": minRating }),
+      sort_by:
+        {
+          rating_desc: "vote_average.desc",
+          rating_asc: "vote_average.asc",
+          year_desc: "primary_release_date.desc",
+          year_asc: "primary_release_date.asc",
+        }[sortBy] || "popularity.desc",
+    };
 
-    // 🔍 Search by title
+    // 🔍 Search query
     if (search) {
-      url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&page=${page}&query=${encodeURIComponent(
-        search
-      )}`;
+      url = `${TMDB_API}/search/movie`;
+      params.query = search;
     }
 
-    // Add filters
-    if (year) url += `&primary_release_year=${year}`;
-    if (language) url += `&with_original_language=${language}`;
-    if (genres) url += `&with_genres=${genres}`; // expect comma-separated genre IDs
-    if (minRating) url += `&vote_average.gte=${minRating}`;
+    const cacheKey = getCacheKey(url, params);
+    const cached = cache.get(cacheKey);
 
-    // Sorting
-    const sortMap = {
-      rating_desc: "vote_average.desc",
-      rating_asc: "vote_average.asc",
-      year_desc: "primary_release_date.desc",
-      year_asc: "primary_release_date.asc",
-    };
-    url += `&sort_by=${sortMap[sortBy] || "popularity.desc"}`;
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      return res.json(cached.data);
+    }
 
-    // Fetch from TMDb
-    const response = await axios.get(url);
-    res.json(response.data);
+    const { data } = await axios.get(url, { params });
+
+    // ✅ Cache result
+    cache.set(cacheKey, { data, timestamp: Date.now() });
+
+    res.json(data);
   } catch (err) {
     console.error("❌ TMDb fetch error:", err.message);
     res.status(500).json({ error: "Failed to fetch movies" });
@@ -186,21 +204,39 @@ router.get("/movies", async (req, res) => {
 /**
  * ✅ Movie Details
  */
+
 router.get("/movie/:id", async (req, res) => {
-  const { id } = req.params;
+  const movieId = req.params.id;
   try {
-    const { data } = await axios.get(`${TMDB_API}/movie/${id}`, {
-      params: {
-        api_key: API_KEY,
-        append_to_response: "videos,credits,similar",
-      },
-    });
-    res.json(data);
-  } catch (err) {
-    console.error("❌ Error fetching TMDb movie by ID:", err.message);
-    res.status(500).json({ error: "Failed to fetch movie details." });
+    const response = await axios.get(
+      `https://api.themoviedb.org/3/movie/${movieId}`,
+      {
+        params: { api_key: API_KEY, language: "en-US" },
+      }
+    );
+    res.json(response.data);
+  } catch (error) {
+    console.error("❌ Error fetching movie details:", error.message);
+    res.status(500).json({ error: "Failed to fetch movie details" });
   }
 });
+
+
+// router.get("/movie/:id", async (req, res) => {
+//   const { id } = req.params;
+//   try {
+//     const { data } = await axios.get(`${TMDB_API}/movie/${id}`, {
+//       params: {
+//         api_key: API_KEY,
+//         append_to_response: "videos,credits,similar",
+//       },
+//     });
+//     res.json(data);
+//   } catch (err) {
+//     console.error("❌ Error fetching TMDb movie by ID:", err.message);
+//     res.status(500).json({ error: "Failed to fetch movie details." });
+//   }
+// });
 
 /**
  * ✅ Watch Providers
@@ -334,23 +370,37 @@ router.get("/genres", async (req, res) => {
 /**
  * ✅ Discover movies by genre
  */
+
 router.get("/discover", async (req, res) => {
+  const {
+    page = 1,
+    with_genres,
+    language,
+    primary_release_year,
+    "vote_average.gte": minRating,
+    sort_by = "popularity.desc",
+  } = req.query;
+
   try {
-    const { with_genres, page = 1 } = req.query;
-
-    const { data } = await axios.get(`${TMDB_API}/discover/movie`, {
-      params: {
-        api_key: API_KEY,
-        with_genres, // e.g. 28 for Action
-        sort_by: "popularity.desc",
-        page,
-      },
-    });
-
-    res.json(data);
-  } catch (err) {
-    console.error("❌ Error fetching discover movies:", err.message);
-    res.status(500).json({ error: "Failed to fetch discover movies." });
+    const response = await axios.get(
+      `https://api.themoviedb.org/3/discover/movie`,
+      {
+        params: {
+          api_key: API_KEY,
+          language: language || "en-US",
+          page,
+          with_genres,
+          primary_release_year,
+          "vote_average.gte": minRating,
+          sort_by,
+          include_adult: false,
+        },
+      }
+    );
+    res.json(response.data);
+  } catch (error) {
+    console.error("❌ Error discovering movies:", error.message);
+    res.status(500).json({ error: "Failed to fetch filtered movies" });
   }
 });
 

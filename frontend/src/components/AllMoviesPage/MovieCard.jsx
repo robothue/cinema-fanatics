@@ -1,28 +1,27 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import WatchlistButton from "../Buttons/watchlistButton"; // ✅ import your watchlist button
+import WatchlistButton from "../Buttons/watchlistButton";
 
 export default function MovieCard({ id, title, year, rating, posterUrl, overview }) {
-  // create a simple movie object for the button
   const movie = {
     id,
     title,
     release_date: year ? `${year}-01-01` : "",
     vote_average: rating,
-    poster_path: posterUrl?.replace("https://image.tmdb.org/t/p/w500", ""), // ✅ clean up URL
+    poster_path: posterUrl?.replace("https://image.tmdb.org/t/p/w500", ""),
     genres: [],
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-black border border-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-red-600 transition-all duration-300">
       {/* Poster */}
       <Link to={`/movie/${id}`}>
-        <div className="h-64 bg-gray-200">
+        <div className="h-64 bg-gray-900">
           {posterUrl ? (
             <img
               src={posterUrl}
               alt={title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             />
           ) : (
             <div className="flex items-center justify-center h-full text-gray-500 text-sm">
@@ -33,29 +32,27 @@ export default function MovieCard({ id, title, year, rating, posterUrl, overview
       </Link>
 
       {/* Content */}
-      <div className="p-3 flex flex-col justify-between h-40">
+      <div className="p-3 flex flex-col justify-between h-44 text-white">
         <div>
           <h3 className="font-semibold text-sm mb-1 line-clamp-1">{title}</h3>
-          <p className="text-xs text-gray-500 mb-1">{year}</p>
-          <p className="text-xs text-yellow-500 mb-2">⭐ {rating}</p>
+          <p className="text-xs text-gray-400 mb-1">{year}</p>
+          <p className="text-xs text-red-500 mb-2">⭐ {rating}</p>
+          <p className="text-xs text-gray-400 line-clamp-2">{overview}</p>
         </div>
 
-        <div className="flex gap-2">
-          {/* ✅ Add to Watchlist button */}
-                <WatchlistButton
-                  tmdbId={id}
-                  title={title}
-                  year={year}
-                  rating={rating}
-                  posterUrl={posterUrl}
-                  mediaType="movie"
-                />
+        <div className="flex gap-2 mt-2">
+          <WatchlistButton
+            tmdbId={id}
+            title={title}
+            year={year}
+            rating={rating}
+            posterUrl={posterUrl}
+            mediaType="movie"
+          />
 
-
-          {/* View Details */}
           <Link
             to={`/movie/${id}`}
-            className="flex-1 bg-black text-white py-2 rounded-md text-sm text-center hover:bg-red-600 hover:text-yellow-200 transition-colors duration-300"
+            className="flex-1 bg-black border border-gray-700 text-white py-2 rounded-md text-sm text-center hover:bg-red-600 hover:text-yellow-200 transition-all duration-300"
           >
             View Details
           </Link>
