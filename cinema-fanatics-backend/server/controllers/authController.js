@@ -9,8 +9,12 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
-// 🔐 Helper to create JWT
-const createToken = (userId) => {
+// helpers
+const createAccessToken = (userId) => {
+  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: "15m" }); // short-lived
+};
+
+const createRefreshToken = (userId) => {
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: "7d" });
 };
 
@@ -25,11 +29,14 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({ name, email, password: hashedPassword });
 
-    const token = createToken(newUser._id);
+    const accessToken = createAccessToken(user._id);
+    const refreshToken = createRefreshToken(user._id);
+
 
     res.status(201).json({
       message: "User created",
-      token,
+      accessToken,
+      refreshToken,
       user: {
         id: newUser._id,
         name: newUser.name,
@@ -54,11 +61,14 @@ exports.login = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = createToken(user._id);
+    const accessToken = createAccessToken(user._id);
+    const refreshToken = createRefreshToken(user._id);
+
 
     res.json({
       message: "Login successful",
-      token,
+      accessToken,
+      refreshToken,
       user: {
         id: user._id,
         name: user.name,
@@ -103,11 +113,14 @@ exports.googleAuth = async (req, res) => {
       if (changed) await user.save();
     }
 
-    const token = createToken(user._id);
+    const accessToken = createAccessToken(user._id);
+    const refreshToken = createRefreshToken(user._id);
+
 
     res.json({
       message: "Google sign-in successful",
-      token,
+      accessToken,
+      refreshToken,
       user: {
         id: user._id,
         name: user.name,
@@ -124,6 +137,26 @@ exports.googleAuth = async (req, res) => {
   }
 };
 
+//Automatic logout 
+exports.refreshToken = async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(401).json({ message: "No refresh token provided" });
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const newAccessToken = createAccessToken(user._id);
+    res.json({ accessToken: newAccessToken });
+  } catch (err) {
+    console.error("Refresh token error:", err);
+    res.status(403).json({ message: "Invalid or expired refresh token" });
+  }
+};
+
+
+
 // ✅ Get Current User
 exports.me = async (req, res) => {
   try {
@@ -139,6 +172,7 @@ exports.me = async (req, res) => {
 
     const decoded = jwt.verify(token, JWT_SECRET);
 
+    // 👇 Correct field name
     const user = await User.findById(decoded.userId).select("-password");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -148,7 +182,7 @@ exports.me = async (req, res) => {
       id: user._id,
       name: user.name,
       email: user.email,
-      picture: user.picture, // ✅ return picture
+      picture: user.picture,
     });
   } catch (err) {
     console.error("❌ /me error:", err);

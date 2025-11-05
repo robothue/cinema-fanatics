@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import WatchlistFilters from "../components/Watchlist/WatchlistFilters";
 import WatchlistGrid from "../components/Watchlist/WatchlistGrid";
+import { useAuth } from "../Context/AuthContext"; // ✅ add this
 
 export default function MyWatchlist() {
+  const { user, token } = useAuth(); // ✅ use context
   const [movies, setMovies] = useState([]);
   const [filters, setFilters] = useState({
     status: "all",
@@ -13,27 +15,28 @@ export default function MyWatchlist() {
     searchTerm: ""
   });
 
-  // dummy user until auth is ready
-  const userId = "123";
-
-  // ✅ Fetch watchlist from backend
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/watchlist/${userId}`)
-      .then(res => setMovies(res.data))
-      .catch(err => console.error("❌ Error fetching watchlist:", err));
-  }, []);
+    if (!user || !token) return; // wait for auth
 
-  // ✅ Remove movie by tmdbId
+    axios.get(`http://localhost:5000/api/watchlist/${user.id}`, {
+      headers: { Authorization: `Bearer ${token}` }, // ✅ send token
+    })
+    .then(res => setMovies(res.data))
+    .catch(err => console.error("❌ Error fetching watchlist:", err));
+  }, [user, token]);
+
   const handleRemove = async (tmdbId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/watchlist/${userId}/${tmdbId}`);
+      await axios.delete(
+        `http://localhost:5000/api/watchlist/${user.id}/${tmdbId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setMovies(prev => prev.filter(m => m.tmdbId !== tmdbId));
     } catch (err) {
       console.error("❌ Error removing movie:", err);
     }
   };
 
-  // Filtering logic
   const filteredMovies = movies.filter(movie => {
     if (filters.status === "watched" && !movie.watched) return false;
     if (filters.status === "not-watched" && movie.watched) return false;

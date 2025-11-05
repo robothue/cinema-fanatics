@@ -1,3 +1,4 @@
+// src/components/Auth/GoogleSignInButton.jsx
 import { useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
@@ -8,13 +9,8 @@ export default function GoogleSignInButton() {
   const handleCredentialResponse = async (response) => {
     const { credential } = response;
     try {
-      // ✅ Send token to backend
       const res = await axios.post("/api/auth/google", { credential });
-
-      // backend returns { token, user: { id, name, email, picture } }
       login(res.data.token, res.data.user);
-
-      // redirect after login
       window.location.href = "/";
     } catch (err) {
       console.error("❌ Google login error:", err.response?.data || err.message);
@@ -25,7 +21,7 @@ export default function GoogleSignInButton() {
     if (window.google) {
       window.google.accounts.id.initialize({
         client_id:
-          "1043421473458-oikmehvjgu4gr6pf9ct2706r0gs9u4rj.apps.googleusercontent.com", // ✅ use env var in production
+          "1043421473458-oikmehvjgu4gr6pf9ct2706r0gs9u4rj.apps.googleusercontent.com",
         callback: handleCredentialResponse,
       });
       window.google.accounts.id.renderButton(
